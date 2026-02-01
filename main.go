@@ -1,6 +1,7 @@
 package main
 
 import (
+	"clawea/ui"
 	"fmt"
 	"os"
 
@@ -66,7 +67,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) View() string {
 	helpView := m.help.View(m.keys)
-	box1 := lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(2).Margin(1).Width(m.width - 4).Render("Content")
+	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
+	box1 := ui.Box.Width(m.width - 4).Render(ui.Thunderstorm)
 	return lipgloss.JoinVertical(lipgloss.Top, box1, helpView)
 }
 
