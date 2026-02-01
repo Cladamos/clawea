@@ -4,6 +4,7 @@ import (
 	"clawea/ui"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -26,11 +27,14 @@ func (k keyMap) FullHelp() [][]key.Binding {
 }
 
 type model struct {
-	width   int
-	height  int
-	keys    keyMap
-	help    help.Model
-	weather string
+	width     int
+	height    int
+	keys      keyMap
+	help      help.Model
+	weather   string
+	apiErrMsg string
+	lat       float64
+	lon       float64
 }
 
 var keys = keyMap{
@@ -48,7 +52,15 @@ func initialModel() *model {
 	}
 }
 func (m *model) Init() tea.Cmd {
-	return nil
+	return getLocation()
+}
+
+type weatherMsg struct{ weather string }
+
+func checkWeather() tea.Cmd {
+	return func() tea.Msg {
+		return weatherMsg{weather: "Sunny"}
+	}
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -61,6 +73,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		}
+	case apiErrorMsg:
+		m.apiErrMsg = msg.message
+		return m, nil
+	case locationMsg:
+		m.lat = msg.Lat
+		m.lon = msg.Lon
+		return m, nil
 	}
 	return m, nil
 }
@@ -69,7 +88,7 @@ func (m *model) View() string {
 	helpView := m.help.View(m.keys)
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	box1 := ui.Box.Width(m.width - 4).Render(ui.Thunderstorm)
-	return lipgloss.JoinVertical(lipgloss.Top, box1, helpView)
+	return lipgloss.JoinVertical(lipgloss.Top, box1, helpView, m.apiErrMsg, strconv.FormatFloat(m.lat, 'f', 6, 64), strconv.FormatFloat(m.lon, 'f', 6, 64))
 }
 
 func main() {
