@@ -54,23 +54,23 @@ func WeatherCodeDecoder(code int, isNight bool) DecodedWeather {
 
 var (
 	Cloudy = `
-     .--.
-  .-(    ).
- (___.__)__)
+      .--.
+   .-(    ).
+  (___.__)__)
 `
 
 	Rainy = `
-     .--.
-  .-(    ).
- (___.__)__)` + blueStyle(`
-   ' ' ' '
+      .--.
+   .-(    ).
+  (___.__)__)` + blueStyle(`
+    ' ' ' '
 `)
 	Snowing = `
-     .--.
-  .-(    ).
- (___.__)__)
-   * * * * 
-   * * * * 
+      .--.
+   .-(    ).
+  (___.__)__)
+    * * * * 
+    * * * * 
 `
 	// PartlyCloudy = `
 	//    \  /
@@ -93,39 +93,43 @@ var (
    / / / /
 `)
 	Thunderstorm = `
-     .--.
-  .-(    ).
- (___.__)__)` + yellowStyle(`
-   /_   /_
-    /    /
+      .--.
+   .-(    ).
+  (___.__)__)` + yellowStyle(`
+    /_   /_
+     /    /
 `)
 	Sunny = yellowStyle(`
-   \   /
-    .-.
- - (   ) -
-    '-'
-   /   \
+    \   /
+     .-.
+  - (   ) -
+     '-'
+    /   \
 `)
 	Foggy = `
- ~   ~   ~   ~ 
-   ~   ~   ~   ~  
- ~   ~   ~   ~ 
-   ~   ~   ~   ~ 
+  ~   ~   ~   
+    ~   ~   ~   
+  ~   ~   ~    
+    ~   ~   ~    
 `
 	// PartlyCloudyNight = `
-	//  /"".-.
-	//  \_(   ).
-	//   (___(__)
+	//    .  .
+	//  . /"".-.
+	//  . \_(   ).
+	//    .(___(__)
 	//`
 
 	PartlyCloudyNight = lightBlueStyle(`
-   /""`) + `.-.` + lightBlueStyle(`
-   \_`) + `(   ).` + `
-    (___(__)`
+    .  .`) + lightBlueStyle(`
+  . /""`) + `.-.` + lightBlueStyle(`
+  . \_`) + `(   ).` + lightBlueStyle(`
+	.`) + `(___(__)`
 
 	ClearNight = lightBlueStyle(`
-    .-.
-   (   ) 
-    '-'
-`)
+    .   .
+     .-.
+  . (   ) .
+     '-'
+    .   .
+   `)
 )
