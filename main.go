@@ -79,10 +79,25 @@ func (m *model) View() string {
 		return "Loading..."
 	}
 	helpView := m.help.View(m.keys)
+
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
-	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + currDecodedWeather.Label)
-	currDay := ui.Box.Width(m.width - 4).Render(currDecodedWeather.Icon)
+
+	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country)
+
+	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
+		"Weather:       %s\n"+
+			"Temperature:   %.0f°C\n"+
+			"Feels Like:    %.0f°C\n"+
+			"Humidity:      %d%%\n"+
+			"Wind Speed:    %.0f km/h\n",
+		currDecodedWeather.Label,
+		m.weather.Current.Temperature,
+		m.weather.Current.ApparentTemperature,
+		m.weather.Current.Humidity,
+		m.weather.Current.WindSpeed,
+	))
+	currDay := ui.Box.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, ui.WeatherIcon.Render(currDecodedWeather.Icon), weatherStats))
 	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDay, helpView)
 }
 

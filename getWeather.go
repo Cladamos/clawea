@@ -23,10 +23,12 @@ type daily struct {
 }
 
 type current struct {
-	WeatherCode int     `json:"weather_code"`
-	Temperature float64 `json:"temperature_2m"`
-	Humidity    int     `json:"relative_humidity_2m"`
-	IsDay       int     `json:"is_day"`
+	WeatherCode         int     `json:"weather_code"`
+	Temperature         float64 `json:"temperature_2m"`
+	ApparentTemperature float64 `json:"apparent_temperature"`
+	Humidity            int     `json:"relative_humidity_2m"`
+	WindSpeed           float64 `json:"wind_speed_10m"`
+	IsDay               int     `json:"is_day"`
 }
 
 type weatherMsg struct {
@@ -63,7 +65,7 @@ func getWeather() tea.Cmd {
 	params.Add("latitude", fmt.Sprintf("%f", location.Lat))
 	params.Add("longitude", fmt.Sprintf("%f", location.Lon))
 	params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
-	params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day")
+	params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
 	params.Add("forecast_days", "4")
 
 	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
@@ -85,6 +87,6 @@ func getWeather() tea.Cmd {
 		if err := json.NewDecoder(res.Body).Decode(&weather); err != nil {
 			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
-		return weatherMsg{Daily: weather.Daily, Location: location}
+		return weatherMsg{Daily: weather.Daily, Current: weather.Current, Location: location}
 	}
 }
