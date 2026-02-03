@@ -10,8 +10,10 @@ import (
 )
 
 type location struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	Lat     float64 `json:"lat"`
+	Lon     float64 `json:"lon"`
+	Country string  `json:"country"`
+	Region  string  `json:"regionName"`
 }
 
 type daily struct {
@@ -20,38 +22,48 @@ type daily struct {
 	MaxTemps     []float64 `json:"temperature_2m_max"`
 }
 
+type current struct {
+	WeatherCode int     `json:"weather_code"`
+	Temperature float64 `json:"temperature_2m"`
+	Humidity    int     `json:"relative_humidity_2m"`
+	IsDay       int     `json:"is_day"`
+}
+
 type weatherMsg struct {
-	Daily daily
+	Daily    daily   `json:"daily"`
+	Current  current `json:"current"`
+	Location location
 }
 
 type apiErrorMsg struct {
 	message string
 }
 
-func getLocation() (lat float64, lon float64, e error) {
-	const url = "http://ip-api.com/json/?fields=status,message,lat,lon"
+func getLocation() (loc location, e error) {
+	const url = "http://ip-api.com/json/?fields=status,message,country,regionName,lat,lon"
 	res, err := http.Get(url)
 	if err != nil {
-		return 0, 0, err
+		return location{}, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return 0, 0, err
+		return location{}, err
 	}
-	var location location
-	if err := json.NewDecoder(res.Body).Decode(&location); err != nil {
-		return 0, 0, err
+	var currLocation location
+	if err := json.NewDecoder(res.Body).Decode(&currLocation); err != nil {
+		return location{}, err
 	}
-	return location.Lat, location.Lon, nil
+	return currLocation, nil
 }
 
-func GetWeather() tea.Cmd {
-	lat, lon, ipApiErr := getLocation()
+func getWeather() tea.Cmd {
+	location, ipApiErr := getLocation()
 	baseURL := "https://api.open-meteo.com/v1/forecast"
 	params := url.Values{}
-	params.Add("latitude", fmt.Sprintf("%f", lat))
-	params.Add("longitude", fmt.Sprintf("%f", lon))
+	params.Add("latitude", fmt.Sprintf("%f", location.Lat))
+	params.Add("longitude", fmt.Sprintf("%f", location.Lon))
 	params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
+	params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day")
 	params.Add("forecast_days", "4")
 
 	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
@@ -73,6 +85,6 @@ func GetWeather() tea.Cmd {
 		if err := json.NewDecoder(res.Body).Decode(&weather); err != nil {
 			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
-		return weatherMsg{Daily: weather.Daily}
+		return weatherMsg{Daily: weather.Daily, Location: location}
 	}
 }

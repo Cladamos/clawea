@@ -50,7 +50,7 @@ func initialModel() *model {
 	}
 }
 func (m *model) Init() tea.Cmd {
-	return GetWeather()
+	return getWeather()
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -80,9 +80,10 @@ func (m *model) View() string {
 	}
 	helpView := m.help.View(m.keys)
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
-	decodedWeather := ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[0])
-	box1 := ui.Box.Width(m.width - 4).Render(decodedWeather.Icon)
-	return lipgloss.JoinVertical(lipgloss.Top, box1, helpView, m.apiErrMsg)
+	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
+	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + currDecodedWeather.Label)
+	currDay := ui.Box.Width(m.width - 4).Render(currDecodedWeather.Icon)
+	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDay, helpView)
 }
 
 func main() {

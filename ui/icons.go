@@ -7,14 +7,20 @@ type DecodedWeather struct {
 	Icon  string
 }
 
-func WeatherCodeDecoder(code int) DecodedWeather {
+func WeatherCodeDecoder(code int, isNight bool) DecodedWeather {
 	switch code {
 	// Clear sky
 	case 0:
+		if isNight {
+			return DecodedWeather{"Open Sky", ClearNight}
+		}
 		return DecodedWeather{"Sunny", Sunny}
 
 	// Mainly clear, partly cloudy
 	case 1, 2:
+		if isNight {
+			return DecodedWeather{"Partly Cloudy", PartlyCloudyNight}
+		}
 		return DecodedWeather{"Partly Cloudy", PartlyCloudy}
 
 	// Overcast
@@ -46,7 +52,7 @@ func WeatherCodeDecoder(code int) DecodedWeather {
 	}
 }
 
-const (
+var (
 	Cloudy = `
      .--.
   .-(    ).
@@ -56,9 +62,9 @@ const (
 	Rainy = `
      .--.
   .-(    ).
- (___.__)__)
+ (___.__)__)` + blueStyle(`
    ' ' ' '
-`
+`)
 	Snowing = `
      .--.
   .-(    ).
@@ -66,37 +72,60 @@ const (
    * * * * 
    * * * * 
 `
-	PartlyCloudy = `
-   \  /
- _ /"".-.
-   \_(   ).
-   /(___(__)
-`
+	// PartlyCloudy = `
+	//    \  /
+	//  _ /"".-.
+	//    \_(   ).
+	//    /(___(__)
+	//`
+
+	PartlyCloudy = yellowStyle(`
+	\  /`) + yellowStyle(`
+  _ /""`) + `.-.` + yellowStyle(`
+	\_`) + `(   ).` + yellowStyle(`
+	/`) + `(___(__)`
+
 	HeavyRain = `
       .--.
    .-(    ).
-  (___.__)__)
+  (___.__)__)` + blueStyle(`
     / / / /
    / / / /
-`
+`)
 	Thunderstorm = `
      .--.
   .-(    ).
- (___.__)__)
+ (___.__)__)` + yellowStyle(`
    /_   /_
     /    /
-`
-	Sunny = `
-      \   /
-       .-.
-    - (   ) -
-       '-'
-      /   \
-`
+`)
+	Sunny = yellowStyle(`
+   \   /
+    .-.
+ - (   ) -
+    '-'
+   /   \
+`)
 	Foggy = `
-	~   ~   ~   ~ 
-	  ~   ~   ~   ~  
-	~   ~   ~   ~ 
-      ~   ~   ~   ~ 
+ ~   ~   ~   ~ 
+   ~   ~   ~   ~  
+ ~   ~   ~   ~ 
+   ~   ~   ~   ~ 
 `
+	// PartlyCloudyNight = `
+	//  /"".-.
+	//  \_(   ).
+	//   (___(__)
+	//`
+
+	PartlyCloudyNight = lightBlueStyle(`
+   /""`) + `.-.` + lightBlueStyle(`
+   \_`) + `(   ).` + `
+    (___(__)`
+
+	ClearNight = lightBlueStyle(`
+    .-.
+   (   ) 
+    '-'
+`)
 )
