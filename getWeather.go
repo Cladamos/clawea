@@ -20,6 +20,7 @@ type daily struct {
 	WeatherCodes []int     `json:"weather_code"`
 	MinTemps     []float64 `json:"temperature_2m_min"`
 	MaxTemps     []float64 `json:"temperature_2m_max"`
+	Dates        []string  `json:"time"`
 }
 
 type current struct {
@@ -66,7 +67,7 @@ func getWeather() tea.Cmd {
 	params.Add("longitude", fmt.Sprintf("%f", location.Lon))
 	params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
 	params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
-	params.Add("forecast_days", "4")
+	params.Add("forecast_days", "6")
 
 	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 	return func() tea.Msg {

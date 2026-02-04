@@ -4,6 +4,7 @@ import (
 	"clawea/ui"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -84,21 +85,36 @@ func (m *model) View() string {
 	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
 
 	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country)
-
+	weatherIcon := ui.WeatherIcon.Render(currDecodedWeather.Icon)
 	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
 		"Weather:       %s\n"+
 			"Temperature:   %.0f°C\n"+
 			"Feels Like:    %.0f°C\n"+
 			"Humidity:      %d%%\n"+
-			"Wind Speed:    %.0f km/h\n",
+			"Wind Speed:    %.0f km/h",
 		currDecodedWeather.Label,
 		m.weather.Current.Temperature,
 		m.weather.Current.ApparentTemperature,
 		m.weather.Current.Humidity,
 		m.weather.Current.WindSpeed,
 	))
-	currDay := ui.Box.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, ui.WeatherIcon.Render(currDecodedWeather.Icon), weatherStats))
-	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDay, helpView)
+	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, weatherIcon, ui.CurrDivider, weatherStats))
+
+	upComingText := ui.UpcomingText.Render("Upcoming Days")
+
+	// We are skipping first day because it is the current day
+	var upComingDays []string
+	for i := 1; i <= 5; i++ {
+		date, _ := time.Parse("2006-01-02", m.weather.Daily.Dates[i])
+		upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Top, date.Format("     Mon 02"), ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon), fmt.Sprintf("   %.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
+		if i != 5 {
+			upComingDays = append(upComingDays, ui.UpComingDivider)
+		}
+	}
+	//TODO: Make upcoming days box responsive
+	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...))
+
+	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBox, upComingText, UpcomingDaysBox, helpView)
 }
 
 func main() {
