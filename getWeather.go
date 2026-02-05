@@ -30,6 +30,7 @@ type current struct {
 	Humidity            int     `json:"relative_humidity_2m"`
 	WindSpeed           float64 `json:"wind_speed_10m"`
 	IsDay               int     `json:"is_day"`
+	Date                string  `json:"time"`
 }
 
 type weatherMsg struct {

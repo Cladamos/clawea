@@ -111,7 +111,8 @@ func (m *model) View() string {
 
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
-	rawCountryText := m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + time.Now().Format("Mon 02")
+	currDate, _ := time.Parse("2006-01-02T15:04", m.weather.Current.Date)
+	rawCountryText := m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + currDate.Format("Mon 02 15:04")
 	countryText := ui.CountryText.Render(rawCountryText)
 	weatherIcon := ui.WeatherIcon.Render(currDecodedWeather.Icon)
 	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
