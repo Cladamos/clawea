@@ -1,10 +1,11 @@
 package main
 
 import (
-	"clawea/ui"
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/cladamos/clawea/ui"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
