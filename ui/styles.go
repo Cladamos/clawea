@@ -14,6 +14,7 @@ var (
 	TitleText    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("10")).Align(lipgloss.Center).MarginLeft(2).MarginTop(1)
 	CountryText  = TitleText.Foreground(lipgloss.Color("10"))
 	UpcomingText = TitleText.Foreground(lipgloss.Color("12")).MarginTop(0)
+	LoadingText  = TitleText.Foreground(lipgloss.Color("10"))
 
 	Divider            = lipgloss.NewStyle().MarginLeft(1).MarginRight(1).Height(9)
 	CurrDayDivider     = Divider.Foreground(lipgloss.Color("10")).Render(strings.Repeat("│\n", 8) + "│")

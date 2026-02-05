@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -27,15 +28,16 @@ func (k keyMap) FullHelp() [][]key.Binding {
 }
 
 type model struct {
-	width       int
-	height      int
-	keys        keyMap
-	help        help.Model
-	apiErrMsg   string
-	weather     weatherMsg
-	temps       tempMsg
-	loading     bool
-	tempLoading bool
+	width          int
+	height         int
+	keys           keyMap
+	help           help.Model
+	apiErrMsg      string
+	weather        weatherMsg
+	temps          tempMsg
+	loadingSpinner spinner.Model
+	loading        bool
+	tempLoading    bool
 }
 
 var keys = keyMap{
@@ -46,15 +48,20 @@ var keys = keyMap{
 }
 
 func initialModel() *model {
+	s := spinner.New()
+	s.Spinner = spinner.Dot
+	s.Tick()
+
 	return &model{
-		keys:        keys,
-		help:        help.New(),
-		loading:     true,
-		tempLoading: true,
+		keys:           keys,
+		help:           help.New(),
+		loading:        true,
+		tempLoading:    true,
+		loadingSpinner: s,
 	}
 }
 func (m *model) Init() tea.Cmd {
-	return getWeather()
+	return tea.Batch(m.loadingSpinner.Tick, getWeather())
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -67,6 +74,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		}
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)
+		return m, cmd
 	case apiErrorMsg:
 		m.apiErrMsg = msg.message
 		return m, nil
@@ -83,8 +94,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
+	var loadingText = lipgloss.JoinHorizontal(lipgloss.Center, m.loadingSpinner.View(), ui.LoadingText.Render(" Loading..."))
 	if m.loading {
-		return "Loading..."
+		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, loadingText)
 	}
 	helpView := m.help.View(m.keys)
 
@@ -108,7 +120,7 @@ func (m *model) View() string {
 
 	var currDayTempChart string
 	if m.tempLoading {
-		currDayTempChart = "Loading..."
+		currDayTempChart = loadingText
 	} else {
 		if m.width > 70 {
 			currDayTempChart = lipgloss.JoinHorizontal(lipgloss.Center, ui.CurrDayDivider, ui.DrawChart(m.width-60, 7, m.temps.Hourly.Temperatures))
