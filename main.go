@@ -93,17 +93,28 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+/*
+	I really messed up the code while trying to make responsive layout
+	I tried to make it understandable with comments but if you don't get it, it counts on me :D
+*/
+
 func (m *model) View() string {
 	loadingText := lipgloss.JoinHorizontal(lipgloss.Center, m.loadingSpinner.View(), ui.LoadingText.Render(" Loading..."))
+	tooSmallText := lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, ui.TooSmallText.Render("Terminal is too small"))
+
 	if m.loading {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, loadingText)
 	}
 	helpView := m.help.View(m.keys)
 
+	// Terminal is too small to show anything
+	if m.height < 14 || (m.height < 17 || m.width < 30) {
+		return tooSmallText
+	}
+
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
-
-	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country)
+	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + time.Now().Format("Mon 02"))
 	weatherIcon := ui.WeatherIcon.Render(currDecodedWeather.Icon)
 	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
 		"Weather:       %s\n"+
@@ -118,6 +129,7 @@ func (m *model) View() string {
 		m.weather.Current.WindSpeed,
 	))
 
+	// Show currDayTempChart if terminal is wide enough
 	var currDayTempChart string
 	if m.tempLoading {
 		currDayTempChart = loadingText
@@ -128,37 +140,59 @@ func (m *model) View() string {
 			currDayTempChart = ""
 		}
 	}
-	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDayDivider, weatherStats, currDayTempChart))
+	currDayBoxInside := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDayDivider, weatherStats, currDayTempChart))
 
-	if m.width < 60 {
-		currDayBox = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
+	// If terminal is not wide enough, we will show boxes vertically
+	// Vertical Layout
+	currDayBox := lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
+	if m.width < 50 {
+		currDayBoxInside = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
-	}
-
-	upComingText := ui.UpcomingText.Render("Upcoming Days")
-
-	var upComingDays []string
-	// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
-	maxCards := (m.width - 4) / 18
-	if maxCards > 5 {
-		maxCards = 5
-	}
-
-	// We are skipping first day because it is the current day
-	for i := 1; i <= maxCards; i++ {
-		date, _ := time.Parse("2006-01-02", m.weather.Daily.Dates[i])
-		upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Center, date.Format("Mon 02"),
-			ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon),
-			fmt.Sprintf("%.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
-		if i != maxCards {
-			upComingDays = append(upComingDays, ui.UpComingDayDivider)
+		currDayBox = lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
+		// If terminal is not tall enough, we will show only the current day box
+		if m.height < 35 {
+			return currDayBox
 		}
 	}
-	//TODO: Make upcoming days box responsive
-	upComingDaysRow := lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...)
-	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center, upComingDaysRow))
 
-	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBox, upComingText, UpcomingDaysBox, helpView)
+	// If terminal really really short we will show only the current day box without countryText
+	if m.height < 20 {
+		currDayBox = lipgloss.JoinVertical(lipgloss.Center, currDayBoxInside)
+		return currDayBox
+	}
+
+	upComingDaysBox := ""
+	// If terminal tall enough we will show upcoming days
+	if m.height > 30 {
+		upComingText := ui.UpcomingText.Render("Upcoming Days")
+		var upComingDays []string
+		// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
+		maxCards := (m.width - 4) / 18
+		if maxCards > 5 {
+			maxCards = 5
+		}
+
+		// We are skipping first day because it is the current day
+		for i := 1; i <= maxCards; i++ {
+			date, _ := time.Parse("2006-01-02", m.weather.Daily.Dates[i])
+			upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Center, date.Format("Mon 02"),
+				ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon),
+				fmt.Sprintf("%.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
+			if i != maxCards {
+				upComingDays = append(upComingDays, ui.UpComingDayDivider)
+			}
+		}
+		upComingDaysRow := lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...)
+		// If terminal is not wide enough, we will show only the first day
+		// Vertical Layout
+		if m.width < 50 {
+			upComingDaysRow = lipgloss.JoinVertical(lipgloss.Center, upComingDays[0])
+		}
+		upComingDaysBoxInside := ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center, upComingDaysRow))
+		upComingDaysBox = lipgloss.JoinVertical(lipgloss.Top, upComingText, upComingDaysBoxInside)
+	}
+	return lipgloss.JoinVertical(lipgloss.Top, currDayBox, upComingDaysBox, helpView)
+
 }
 
 func main() {
