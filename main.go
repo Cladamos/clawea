@@ -114,7 +114,8 @@ func (m *model) View() string {
 
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(m.weather.Current.WeatherCode, m.weather.Current.IsDay == 0)
-	countryText := ui.CountryText.Render(m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + time.Now().Format("Mon 02"))
+	rawCountryText := m.weather.Location.Region + ", " + m.weather.Location.Country + " | " + time.Now().Format("Mon 02")
+	countryText := ui.CountryText.Render(rawCountryText)
 	weatherIcon := ui.WeatherIcon.Render(currDecodedWeather.Icon)
 	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
 		"Weather:       %s\n"+
@@ -142,13 +143,15 @@ func (m *model) View() string {
 	}
 	currDayBoxInside := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDayDivider, weatherStats, currDayTempChart))
 
+	// Vertical Layout //
 	// If terminal is not wide enough, we will show boxes vertically
-	// Vertical Layout
+	// Remove 2 first characters from countryText because of the margin
 	currDayBox := lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
 	if m.width < 50 {
+		countryText = ui.CountryText.MarginLeft(0).Render(rawCountryText)
 		currDayBoxInside = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
-		currDayBox = lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
+		currDayBox = lipgloss.JoinVertical(lipgloss.Center, countryText, currDayBoxInside)
 		// If terminal is not tall enough, we will show only the current day box
 		if m.height < 35 {
 			return currDayBox
@@ -183,13 +186,16 @@ func (m *model) View() string {
 			}
 		}
 		upComingDaysRow := lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...)
-		// If terminal is not wide enough, we will show only the first day
-		// Vertical Layout
-		if m.width < 50 {
-			upComingDaysRow = lipgloss.JoinVertical(lipgloss.Center, upComingDays[0])
-		}
 		upComingDaysBoxInside := ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center, upComingDaysRow))
 		upComingDaysBox = lipgloss.JoinVertical(lipgloss.Top, upComingText, upComingDaysBoxInside)
+
+		// Vertical Layout //
+		// If terminal is not wide enough, we will show upComingText on center
+		// Remove 2 first characters from upComingText because of the margin
+		if m.width < 50 {
+			upComingText = ui.UpcomingText.MarginLeft(0).Render("Upcoming Days")
+			upComingDaysBox = lipgloss.JoinVertical(lipgloss.Center, upComingText, upComingDaysBoxInside)
+		}
 	}
 	return lipgloss.JoinVertical(lipgloss.Top, currDayBox, upComingDaysBox, helpView)
 
