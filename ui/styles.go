@@ -17,10 +17,10 @@ var (
 
 	Divider         = lipgloss.NewStyle().MarginLeft(1).MarginRight(1).Height(5)
 	CurrDivider     = Divider.Foreground(lipgloss.Color("10")).Render(strings.Repeat("│\n", 4) + "│")
-	UpComingDivider = Divider.Foreground(lipgloss.Color("12")).Height(7).Render(strings.Repeat("│\n", 7) + "│")
+	UpComingDivider = Divider.Foreground(lipgloss.Color("12")).Height(8).Render(strings.Repeat("│\n", 8) + "│")
 
-	WeatherIcon  = lipgloss.NewStyle().PaddingRight(3).Height(5)
-	WeatherStats = lipgloss.NewStyle().PaddingRight(3).PaddingLeft(3).Height(5).BorderForeground(lipgloss.Color("10"))
+	WeatherIcon  = lipgloss.NewStyle().Height(5).Width(15)
+	WeatherStats = lipgloss.NewStyle().PaddingLeft(2).Height(5).BorderForeground(lipgloss.Color("10"))
 
 	// Icon Color Styles
 	yellowStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("226")).Render

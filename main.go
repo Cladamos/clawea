@@ -99,20 +99,33 @@ func (m *model) View() string {
 		m.weather.Current.WindSpeed,
 	))
 	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, weatherIcon, ui.CurrDivider, weatherStats))
+	if m.width < 50 {
+		currDayBox = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 8, lipgloss.Center, lipgloss.Center,
+			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
+	}
 
 	upComingText := ui.UpcomingText.Render("Upcoming Days")
 
-	// We are skipping first day because it is the current day
 	var upComingDays []string
-	for i := 1; i <= 5; i++ {
+	// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
+	maxCards := (m.width - 4) / 18
+	if maxCards > 5 {
+		maxCards = 5
+	}
+
+	// We are skipping first day because it is the current day
+	for i := 1; i <= maxCards; i++ {
 		date, _ := time.Parse("2006-01-02", m.weather.Daily.Dates[i])
-		upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Top, date.Format("     Mon 02"), ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon), fmt.Sprintf("   %.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
-		if i != 5 {
+		upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Center, date.Format("Mon 02"),
+			ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon),
+			fmt.Sprintf("%.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
+		if i != maxCards {
 			upComingDays = append(upComingDays, ui.UpComingDivider)
 		}
 	}
 	//TODO: Make upcoming days box responsive
-	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...))
+	upComingDaysRow := lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...)
+	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 8, lipgloss.Center, lipgloss.Center, upComingDaysRow))
 
 	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBox, upComingText, UpcomingDaysBox, helpView)
 }

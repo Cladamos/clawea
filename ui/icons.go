@@ -69,6 +69,8 @@ var (
       .--.
    .-(    ).
   (___.__)__)
+
+
 `
 
 	Rainy = `
@@ -76,6 +78,7 @@ var (
    .-(    ).
   (___.__)__)` + blueStyle(`
     ' ' ' '
+
 `)
 	Snowing = `
       .--.
@@ -95,7 +98,8 @@ var (
 	\  /`) + yellowStyle(`
   _ /""`) + `.-.` + yellowStyle(`
 	\_`) + `(   ).` + yellowStyle(`
-	/`) + `(___(__)`
+	/`) + `(___(__)
+`
 
 	HeavyRain = `
       .--.
@@ -122,7 +126,8 @@ var (
   ~   ~   ~   
     ~   ~   ~   
   ~   ~   ~    
-    ~   ~   ~    
+    ~   ~   ~
+
 `
 	// PartlyCloudyNight = `
 	//    .  .
@@ -135,7 +140,8 @@ var (
     .  .`) + lightBlueStyle(`
   . /""`) + `.-.` + lightBlueStyle(`
   . \_`) + `(   ).` + lightBlueStyle(`
-	.`) + `(___(__)`
+	.`) + `(___(__)
+`
 
 	ClearNight = lightBlueStyle(`
     .   .
