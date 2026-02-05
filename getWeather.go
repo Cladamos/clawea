@@ -110,7 +110,6 @@ func getTempData(lat, lon float64) tea.Cmd {
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
-		fmt.Println(fullURL)
 		res, err := http.Get(fullURL)
 		if err != nil {
 			return apiErrorMsg{message: "Request failed: " + err.Error()}

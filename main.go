@@ -94,7 +94,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
-	var loadingText = lipgloss.JoinHorizontal(lipgloss.Center, m.loadingSpinner.View(), ui.LoadingText.Render(" Loading..."))
+	loadingText := lipgloss.JoinHorizontal(lipgloss.Center, m.loadingSpinner.View(), ui.LoadingText.Render(" Loading..."))
 	if m.loading {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, loadingText)
 	}
