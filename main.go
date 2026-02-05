@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -31,7 +30,6 @@ type model struct {
 	width          int
 	height         int
 	keys           keyMap
-	help           help.Model
 	apiErrMsg      string
 	weather        weatherMsg
 	temps          tempMsg
@@ -54,7 +52,6 @@ func initialModel() *model {
 
 	return &model{
 		keys:           keys,
-		help:           help.New(),
 		loading:        true,
 		tempLoading:    true,
 		loadingSpinner: s,
@@ -105,10 +102,9 @@ func (m *model) View() string {
 	if m.loading {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, loadingText)
 	}
-	helpView := m.help.View(m.keys)
 
 	// Terminal is too small to show anything
-	if m.height < 14 || (m.height < 17 || m.width < 30) {
+	if m.height < 14 || m.width < 30 || (m.height < 17 && m.width < 50) {
 		return tooSmallText
 	}
 
@@ -145,21 +141,17 @@ func (m *model) View() string {
 
 	// Vertical Layout //
 	// If terminal is not wide enough, we will show boxes vertically
-	// Remove 2 first characters from countryText because of the margin
+	// Remove countryText margin
 	currDayBox := lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
 	if m.width < 50 {
 		countryText = ui.CountryText.MarginLeft(0).Render(rawCountryText)
 		currDayBoxInside = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
 		currDayBox = lipgloss.JoinVertical(lipgloss.Center, countryText, currDayBoxInside)
-		// If terminal is not tall enough, we will show only the current day box
-		if m.height < 35 {
-			return currDayBox
-		}
 	}
 
 	// If terminal really really short we will show only the current day box without countryText
-	if m.height < 20 {
+	if m.height < 16 {
 		currDayBox = lipgloss.JoinVertical(lipgloss.Center, currDayBoxInside)
 		return currDayBox
 	}
@@ -190,14 +182,12 @@ func (m *model) View() string {
 		upComingDaysBox = lipgloss.JoinVertical(lipgloss.Top, upComingText, upComingDaysBoxInside)
 
 		// Vertical Layout //
-		// If terminal is not wide enough, we will show upComingText on center
-		// Remove 2 first characters from upComingText because of the margin
+		// If terminal is not wide enough, we will show only the upcoming days box inside
 		if m.width < 50 {
-			upComingText = ui.UpcomingText.MarginLeft(0).Render("Upcoming Days")
-			upComingDaysBox = lipgloss.JoinVertical(lipgloss.Center, upComingText, upComingDaysBoxInside)
+			upComingDaysBox = upComingDaysBoxInside
 		}
 	}
-	return lipgloss.JoinVertical(lipgloss.Top, currDayBox, upComingDaysBox, helpView)
+	return lipgloss.JoinVertical(lipgloss.Top, currDayBox, upComingDaysBox)
 
 }
 

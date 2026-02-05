@@ -7,13 +7,15 @@ import (
 )
 
 var (
-	Box             = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1).Margin(1).MarginTop(0).Height(9)
+	Box             = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1).Margin(0, 1).Height(9)
 	CurrDayBox      = Box.BorderForeground(lipgloss.Color("10"))
 	UpComingDaysBox = Box.BorderForeground(lipgloss.Color("12"))
 
+	HelpView = lipgloss.NewStyle().Align(lipgloss.Center).Height(1)
+
 	TitleText    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("10")).Align(lipgloss.Center).MarginLeft(2).MarginTop(1)
 	CountryText  = TitleText.Foreground(lipgloss.Color("10"))
-	UpcomingText = TitleText.Foreground(lipgloss.Color("12")).MarginTop(0)
+	UpcomingText = TitleText.Foreground(lipgloss.Color("12"))
 	LoadingText  = TitleText.Foreground(lipgloss.Color("10"))
 	TooSmallText = TitleText.Foreground(lipgloss.Color("10"))
 
