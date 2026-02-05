@@ -27,13 +27,15 @@ func (k keyMap) FullHelp() [][]key.Binding {
 }
 
 type model struct {
-	width     int
-	height    int
-	keys      keyMap
-	help      help.Model
-	apiErrMsg string
-	weather   weatherMsg
-	loading   bool
+	width       int
+	height      int
+	keys        keyMap
+	help        help.Model
+	apiErrMsg   string
+	weather     weatherMsg
+	temps       tempMsg
+	loading     bool
+	tempLoading bool
 }
 
 var keys = keyMap{
@@ -45,9 +47,10 @@ var keys = keyMap{
 
 func initialModel() *model {
 	return &model{
-		keys:    keys,
-		help:    help.New(),
-		loading: true,
+		keys:        keys,
+		help:        help.New(),
+		loading:     true,
+		tempLoading: true,
 	}
 }
 func (m *model) Init() tea.Cmd {
@@ -70,6 +73,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case weatherMsg:
 		m.weather = msg
 		m.loading = false
+		return m, getTempData(m.weather.Location.Lat, m.weather.Location.Lon)
+	case tempMsg:
+		m.temps = msg
+		m.tempLoading = false
 		return m, nil
 	}
 	return m, nil
@@ -98,9 +105,21 @@ func (m *model) View() string {
 		m.weather.Current.Humidity,
 		m.weather.Current.WindSpeed,
 	))
-	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Top, weatherIcon, ui.CurrDivider, weatherStats))
-	if m.width < 50 {
-		currDayBox = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 8, lipgloss.Center, lipgloss.Center,
+
+	var currDayChart string
+	if m.tempLoading {
+		currDayChart = "Loading..."
+	} else {
+		if m.width > 80 {
+			currDayChart = ui.DrawChart(m.width-60, 7, m.temps.Hourly.Temperatures)
+		} else {
+			currDayChart = ""
+		}
+	}
+	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDivider, weatherStats, ui.CurrDivider, currDayChart))
+
+	if m.width < 60 {
+		currDayBox = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
 	}
 
@@ -125,7 +144,7 @@ func (m *model) View() string {
 	}
 	//TODO: Make upcoming days box responsive
 	upComingDaysRow := lipgloss.JoinHorizontal(lipgloss.Top, upComingDays...)
-	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 8, lipgloss.Center, lipgloss.Center, upComingDaysRow))
+	var UpcomingDaysBox = ui.UpComingDaysBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center, upComingDaysRow))
 
 	return lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBox, upComingText, UpcomingDaysBox, helpView)
 }

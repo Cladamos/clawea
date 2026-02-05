@@ -38,6 +38,14 @@ type weatherMsg struct {
 	Location location
 }
 
+type hourly struct {
+	Temperatures []float64 `json:"temperature_2m"`
+}
+
+type tempMsg struct {
+	Hourly hourly `json:"hourly"`
+}
+
 type apiErrorMsg struct {
 	message string
 }
@@ -60,22 +68,21 @@ func getLocation() (loc location, e error) {
 }
 
 func getWeather() tea.Cmd {
-	location, ipApiErr := getLocation()
-	baseURL := "https://api.open-meteo.com/v1/forecast"
-	params := url.Values{}
-	params.Add("latitude", fmt.Sprintf("%f", location.Lat))
-	params.Add("longitude", fmt.Sprintf("%f", location.Lon))
-	params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
-	params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
-	params.Add("forecast_days", "6")
-
-	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 	return func() tea.Msg {
+		location, ipApiErr := getLocation()
+		baseURL := "https://api.open-meteo.com/v1/forecast"
+		params := url.Values{}
+		params.Add("latitude", fmt.Sprintf("%f", location.Lat))
+		params.Add("longitude", fmt.Sprintf("%f", location.Lon))
+		params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
+		params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
+		params.Add("forecast_days", "6")
+
+		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 		if ipApiErr != nil {
 			return apiErrorMsg{message: "Request failed: " + ipApiErr.Error()}
 		}
 
-		fmt.Println(fullURL)
 		res, err := http.Get(fullURL)
 		if err != nil {
 			return apiErrorMsg{message: "Request failed: " + err.Error()}
@@ -89,5 +96,33 @@ func getWeather() tea.Cmd {
 			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
 		return weatherMsg{Daily: weather.Daily, Current: weather.Current, Location: location}
+	}
+}
+
+func getTempData(lat, lon float64) tea.Cmd {
+	return func() tea.Msg {
+		baseURL := "https://api.open-meteo.com/v1/forecast"
+		params := url.Values{}
+		params.Add("latitude", fmt.Sprintf("%f", lat))
+		params.Add("longitude", fmt.Sprintf("%f", lon))
+		params.Add("hourly", "temperature_2m")
+		params.Add("forecast_days", "1")
+
+		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
+		fmt.Println(fullURL)
+		res, err := http.Get(fullURL)
+		if err != nil {
+			return apiErrorMsg{message: "Request failed: " + err.Error()}
+		}
+		defer res.Body.Close()
+		if res.StatusCode != http.StatusOK {
+			return apiErrorMsg{message: "Error: Received status code " + res.Status}
+		}
+		var temp tempMsg
+		if err := json.NewDecoder(res.Body).Decode(&temp); err != nil {
+			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
+		}
+		return tempMsg{Hourly: temp.Hourly}
 	}
 }
