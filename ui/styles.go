@@ -15,9 +15,9 @@ var (
 	CountryText  = TitleText.Foreground(lipgloss.Color("10"))
 	UpcomingText = TitleText.Foreground(lipgloss.Color("12")).MarginTop(0)
 
-	Divider         = lipgloss.NewStyle().MarginLeft(1).MarginRight(1).Height(9)
-	CurrDivider     = Divider.Foreground(lipgloss.Color("10")).Render(strings.Repeat("│\n", 8) + "│")
-	UpComingDivider = Divider.Foreground(lipgloss.Color("12")).Render(strings.Repeat("│\n", 8) + "│")
+	Divider            = lipgloss.NewStyle().MarginLeft(1).MarginRight(1).Height(9)
+	CurrDayDivider     = Divider.Foreground(lipgloss.Color("10")).Render(strings.Repeat("│\n", 8) + "│")
+	UpComingDayDivider = Divider.Foreground(lipgloss.Color("12")).Render(strings.Repeat("│\n", 8) + "│")
 
 	WeatherIcon  = lipgloss.NewStyle().Height(5).Width(15)
 	WeatherStats = lipgloss.NewStyle().Padding(0, 2).Height(5).BorderForeground(lipgloss.Color("10"))

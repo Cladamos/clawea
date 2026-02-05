@@ -106,17 +106,17 @@ func (m *model) View() string {
 		m.weather.Current.WindSpeed,
 	))
 
-	var currDayChart string
+	var currDayTempChart string
 	if m.tempLoading {
-		currDayChart = "Loading..."
+		currDayTempChart = "Loading..."
 	} else {
-		if m.width > 80 {
-			currDayChart = ui.DrawChart(m.width-60, 7, m.temps.Hourly.Temperatures)
+		if m.width > 70 {
+			currDayTempChart = lipgloss.JoinHorizontal(lipgloss.Center, ui.CurrDayDivider, ui.DrawChart(m.width-60, 7, m.temps.Hourly.Temperatures))
 		} else {
-			currDayChart = ""
+			currDayTempChart = ""
 		}
 	}
-	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDivider, weatherStats, ui.CurrDivider, currDayChart))
+	currDayBox := ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.JoinHorizontal(lipgloss.Center, weatherIcon, ui.CurrDayDivider, weatherStats, currDayTempChart))
 
 	if m.width < 60 {
 		currDayBox = ui.CurrDayBox.Width(m.width - 4).Render(lipgloss.Place(m.width-4, 9, lipgloss.Center, lipgloss.Center,
@@ -139,7 +139,7 @@ func (m *model) View() string {
 			ui.WeatherIcon.Render(ui.WeatherCodeDecoder(m.weather.Daily.WeatherCodes[i], false).Icon),
 			fmt.Sprintf("%.0f°C  %.0f°C", m.weather.Daily.MaxTemps[i], m.weather.Daily.MinTemps[i])))
 		if i != maxCards {
-			upComingDays = append(upComingDays, ui.UpComingDivider)
+			upComingDays = append(upComingDays, ui.UpComingDayDivider)
 		}
 	}
 	//TODO: Make upcoming days box responsive
