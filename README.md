@@ -24,5 +24,5 @@ clawea
 
 ## APIs Used
 
-- [Open-Meteo](https://open-meteo.com/)
-- [ip-api](https://ip-api.com/)
+- I used [Open-Meteo](https://open-meteo.com/) for all weather data in the application.
+- I used [ip-api](https://ip-api.com/) to find the user's location.
