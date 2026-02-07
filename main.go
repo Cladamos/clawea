@@ -59,7 +59,7 @@ func initialModel() *model {
 	}
 }
 func (m *model) Init() tea.Cmd {
-	return tea.Batch(m.loadingSpinner.Tick, getWeather())
+	return tea.Batch(m.loadingSpinner.Tick, getWeather(), tickEveryHour())
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -72,6 +72,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 		}
+	case hourlyTickMsg:
+		m.loading = true
+		return m, tea.Batch(getWeather(), tickEveryHour())
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)

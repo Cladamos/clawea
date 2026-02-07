@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -49,6 +50,8 @@ type tempMsg struct {
 
 type apiErrorMsg struct {
 	message string
+}
+type hourlyTickMsg struct {
 }
 
 func getLocation() (loc location, e error) {
@@ -124,5 +127,12 @@ func getTempData(lat, lon float64) tea.Cmd {
 			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
 		return tempMsg{Hourly: temp.Hourly}
+	}
+}
+
+func tickEveryHour() tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(time.Hour)
+		return hourlyTickMsg{}
 	}
 }
