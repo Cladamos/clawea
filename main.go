@@ -133,7 +133,7 @@ func (m *model) View() string {
 	if m.tempLoading {
 		currDayTempChart = loadingText
 	} else {
-		if m.width > 70 {
+		if m.width > 75 {
 			currDayTempChart = lipgloss.JoinHorizontal(lipgloss.Center, ui.CurrDayDivider, ui.DrawChart(m.width-60, 7, m.temps.Hourly.Temperatures))
 		} else {
 			currDayTempChart = ""

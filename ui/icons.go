@@ -31,9 +31,9 @@ func WeatherCodeDecoder(code int, isNight bool) DecodedWeather {
 	// Mainly clear, partly cloudy
 	case 1, 2:
 		if isNight {
-			return DecodedWeather{"Partly Cloudy", trimIconSpaces(PartlyCloudyNight)}
+			return DecodedWeather{"Few Clouds", trimIconSpaces(PartlyCloudyNight)}
 		}
-		return DecodedWeather{"Partly Cloudy", trimIconSpaces(PartlyCloudy)}
+		return DecodedWeather{"Few Clouds", trimIconSpaces(PartlyCloudy)}
 
 	// Overcast
 	case 3:
@@ -72,7 +72,6 @@ var (
 
 
 `
-
 	Rainy = `
       .--.
    .-(    ).
@@ -116,11 +115,11 @@ var (
      /    /
 `)
 	Sunny = yellowStyle(`
-    \   /
-     .-.
-  - (   ) -
-     '-'
-    /   \
+     \   /
+      .-.
+   - (   ) -
+      '-'
+     /   \
 `)
 	Foggy = `
   ~   ~   ~   
@@ -144,10 +143,10 @@ var (
 `
 
 	ClearNight = lightBlueStyle(`
-    .   .
-     .-.
-  . (   ) .
-     '-'
-    .   .
+     .   .
+      .-.
+   . (   ) .
+      '-'
+     .   .
    `)
 )
