@@ -2,6 +2,8 @@
 
 A terminal based weather forecast application written in Go using [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lipgloss](https://github.com/charmbracelet/lipgloss)
 
+![clawea](screenshots/fullUi.png)
+
 ## Installation
 
 ```bash
