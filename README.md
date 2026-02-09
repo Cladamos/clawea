@@ -22,7 +22,9 @@ clawea
 
 ### Controls
 
-- `q` or `ctrl+c`: Quit the application.
+- `q` or `ctrl+c`: Quit the application
+- `l` or `→`: Next Page
+- `h` or `←`: Previous Page
 
 ## APIs Used
 
