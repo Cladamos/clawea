@@ -9,7 +9,8 @@ import (
 	"github.com/cladamos/clawea/weather"
 )
 
-func Overview(weather weather.WeatherMsg, temps []float64, width int, height int, tempLoading bool, loading bool, loadingText string) string {
+func Overview(weather weather.WeatherMsg, temps []float64, width int, height int,
+	isVertical bool, isOneBoxLayout bool, tempLoading bool, loading bool, loadingText string) string {
 
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(weather.Current.WeatherCode, weather.Current.IsDay == 0)
@@ -47,7 +48,7 @@ func Overview(weather weather.WeatherMsg, temps []float64, width int, height int
 	// If terminal is not wide enough, we will show boxes vertically
 	// Remove countryText margin
 	currDayBox := lipgloss.JoinVertical(lipgloss.Top, countryText, currDayBoxInside)
-	if width < 50 {
+	if isVertical {
 		countryText = ui.CountryText.MarginLeft(0).Render(rawCountryText)
 		currDayBoxInside = ui.CurrDayBox.Width(width - 4).Render(lipgloss.Place(width-4, 9, lipgloss.Center, lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, weatherIcon, weatherStats)))
@@ -62,7 +63,7 @@ func Overview(weather weather.WeatherMsg, temps []float64, width int, height int
 
 	upComingDaysBox := ""
 	// If terminal tall enough we will show upcoming days
-	if height > 30 {
+	if !isOneBoxLayout {
 		upComingText := ui.UpcomingText.Render("Upcoming Days")
 		var upComingDays []string
 		// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
@@ -87,7 +88,7 @@ func Overview(weather weather.WeatherMsg, temps []float64, width int, height int
 
 		// Vertical Layout //
 		// If terminal is not wide enough, we will show only the upcoming days box inside
-		if width < 50 {
+		if isVertical {
 			upComingDaysBox = upComingDaysBoxInside
 		}
 	}

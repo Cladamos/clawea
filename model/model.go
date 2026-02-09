@@ -131,16 +131,23 @@ func (m *model) View() string {
 	}
 
 	// Terminal is too small to show anything
-	if m.height < 14 || m.width < 30 || (m.height < 17 && m.width < 50) {
+	if m.height < 14 || m.width < 35 || (m.height < 18 && m.width < 50) {
 		return tooSmallText
 	}
-
+	var isVertical bool
+	if m.width < 50 {
+		isVertical = true
+	}
+	var isOneBoxLayout bool
+	if m.height < 32 {
+		isOneBoxLayout = true
+	}
 	currPage := ""
 	switch m.page {
 	case 0:
-		currPage = pages.Overview(m.weather, m.currDayWeather.Hourly.Temperatures, m.width, m.height, m.tempLoading, m.loading, loadingText)
+		currPage = pages.Overview(m.weather, m.currDayWeather.Hourly.Temperatures, m.width, m.height, isVertical, isOneBoxLayout, m.tempLoading, m.loading, loadingText)
 	case 1:
-		currPage = pages.DailyStast(m.currDayWeather, m.width, m.height)
+		currPage = pages.DailyStast(m.currDayWeather, m.width, m.height, isOneBoxLayout, isVertical)
 	}
 	return lipgloss.JoinVertical(lipgloss.Center, currPage, m.paginator.View())
 }

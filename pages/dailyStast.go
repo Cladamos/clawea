@@ -59,7 +59,7 @@ func createWeatherCards(currDayWeather weather.CurrDayWeatherMsg) []hourlyWeathe
 	return cards
 }
 
-func DailyStast(currDayWeather weather.CurrDayWeatherMsg, width int, height int) string {
+func DailyStast(currDayWeather weather.CurrDayWeatherMsg, width int, height int, isOneBoxLayout bool, isVertical bool) string {
 
 	cardDatas := createWeatherCards(currDayWeather)
 	// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
@@ -79,12 +79,34 @@ func DailyStast(currDayWeather weather.CurrDayWeatherMsg, width int, height int)
 	}
 	weatherStatsRow := lipgloss.JoinHorizontal(lipgloss.Top, cards...)
 	weatherStatsText := ui.DailyWeatherText.Render("Daily Weather")
-	weatherStatsBox := ui.DailyWeatherStatsBox.Width(width - 4).Render(lipgloss.Place(width-4, 9, lipgloss.Center, lipgloss.Center, weatherStatsRow))
+	weatherStatsInside := ui.DailyWeatherStatsBox.Width(width - 4).Render(lipgloss.Place(width-4, 9, lipgloss.Center, lipgloss.Center, weatherStatsRow))
 
-	precipitationText := ui.PrecipitationText.Render("Daily Precipitation Probabilities (%)")
-	precipitationChart := ui.DrawChart(width-16, 9, currDayWeather.Hourly.PrecipitationProbabilities, "precipitation")
-	precipitationInside := ui.DailyPrecipitationBox.Width(width - 4).Render(lipgloss.Place(width-6, 9, lipgloss.Center, lipgloss.Center, precipitationChart))
-	precipitationBox := lipgloss.JoinVertical(lipgloss.Top, precipitationText, precipitationInside)
+	var weatherStatsBox string
+	if isVertical {
+		weatherStatsBox = lipgloss.JoinVertical(lipgloss.Center, weatherStatsText, weatherStatsInside)
+	} else {
+		weatherStatsBox = lipgloss.JoinVertical(lipgloss.Top, weatherStatsText, weatherStatsInside)
+	}
 
-	return lipgloss.JoinVertical(lipgloss.Top, weatherStatsText, weatherStatsBox, precipitationBox)
+	precipitationText := ui.PrecipitationText.Render("Precipitation Probabilities")
+
+	var chartHeight int
+	if isVertical {
+		chartHeight = 10
+	} else {
+		chartHeight = 9
+	}
+	precipitationChart := ui.DrawChart(width-16, chartHeight, currDayWeather.Hourly.PrecipitationProbabilities, "precipitation")
+	precipitationInside := ui.DailyPrecipitationBox.Width(width - 4).Render(lipgloss.Place(width-6, chartHeight, lipgloss.Center, lipgloss.Center, precipitationChart))
+
+	var precipitationBox string
+	if isVertical {
+		precipitationBox = lipgloss.JoinVertical(lipgloss.Center, precipitationText, precipitationInside)
+	} else {
+		precipitationBox = lipgloss.JoinVertical(lipgloss.Top, precipitationText, precipitationInside)
+	}
+	if isOneBoxLayout {
+		return weatherStatsBox
+	}
+	return lipgloss.JoinVertical(lipgloss.Top, weatherStatsBox, precipitationBox)
 }
