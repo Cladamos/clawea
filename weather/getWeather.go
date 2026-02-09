@@ -1,4 +1,4 @@
-package main
+package weather
 
 import (
 	"encoding/json"
@@ -34,24 +34,26 @@ type current struct {
 	Date                string  `json:"time"`
 }
 
-type weatherMsg struct {
+type WeatherMsg struct {
 	Daily    daily   `json:"daily"`
 	Current  current `json:"current"`
 	Location location
 }
 
 type hourly struct {
-	Temperatures []float64 `json:"temperature_2m"`
+	WeatherCodes               []int     `json:"weather_code"`
+	PrecipitationProbabilities []float64 `json:"precipitation_probability"`
+	Temperatures               []float64 `json:"temperature_2m"`
 }
 
-type tempMsg struct {
+type CurrDayWeatherMsg struct {
 	Hourly hourly `json:"hourly"`
 }
 
-type apiErrorMsg struct {
+type ApiErrorMsg struct {
 	message string
 }
-type hourlyTickMsg struct {
+type HourlyTickMsg struct {
 }
 
 func getLocation() (loc location, e error) {
@@ -71,7 +73,7 @@ func getLocation() (loc location, e error) {
 	return currLocation, nil
 }
 
-func getWeather() tea.Cmd {
+func GetWeather() tea.Cmd {
 	return func() tea.Msg {
 		location, ipApiErr := getLocation()
 		baseURL := "https://api.open-meteo.com/v1/forecast"
@@ -84,55 +86,56 @@ func getWeather() tea.Cmd {
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 		if ipApiErr != nil {
-			return apiErrorMsg{message: "Request failed: " + ipApiErr.Error()}
+			return ApiErrorMsg{message: "Request failed: " + ipApiErr.Error()}
 		}
 
 		res, err := http.Get(fullURL)
 		if err != nil {
-			return apiErrorMsg{message: "Request failed: " + err.Error()}
+			return ApiErrorMsg{message: "Request failed: " + err.Error()}
 		}
 		defer res.Body.Close()
 		if res.StatusCode != http.StatusOK {
-			return apiErrorMsg{message: "Error: Received status code " + res.Status}
+			return ApiErrorMsg{message: "Error: Received status code " + res.Status}
 		}
-		var weather weatherMsg
+		var weather WeatherMsg
 		if err := json.NewDecoder(res.Body).Decode(&weather); err != nil {
-			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
+			return ApiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
-		return weatherMsg{Daily: weather.Daily, Current: weather.Current, Location: location}
+		return WeatherMsg{Daily: weather.Daily, Current: weather.Current, Location: location}
 	}
 }
 
-func getTempData(lat, lon float64) tea.Cmd {
+func GetCurrDayWeather(lat, lon float64) tea.Cmd {
 	return func() tea.Msg {
 		baseURL := "https://api.open-meteo.com/v1/forecast"
 		params := url.Values{}
 		params.Add("latitude", fmt.Sprintf("%f", lat))
 		params.Add("longitude", fmt.Sprintf("%f", lon))
-		params.Add("hourly", "temperature_2m")
+		params.Add("hourly", "temperature_2m,weather_code,precipitation_probability")
+		params.Add("timezone", "auto")
 		params.Add("forecast_days", "1")
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 		res, err := http.Get(fullURL)
 		if err != nil {
-			return apiErrorMsg{message: "Request failed: " + err.Error()}
+			return ApiErrorMsg{message: "Request failed: " + err.Error()}
 		}
 		defer res.Body.Close()
 		if res.StatusCode != http.StatusOK {
-			return apiErrorMsg{message: "Error: Received status code " + res.Status}
+			return ApiErrorMsg{message: "Error: Received status code " + res.Status}
 		}
-		var temp tempMsg
-		if err := json.NewDecoder(res.Body).Decode(&temp); err != nil {
-			return apiErrorMsg{message: "Failed to parse response: " + err.Error()}
+		var currDayWeather CurrDayWeatherMsg
+		if err := json.NewDecoder(res.Body).Decode(&currDayWeather); err != nil {
+			return ApiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
-		return tempMsg{Hourly: temp.Hourly}
+		return CurrDayWeatherMsg{Hourly: currDayWeather.Hourly}
 	}
 }
 
-func tickEveryHour() tea.Cmd {
+func TickEveryHour() tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(time.Hour)
-		return hourlyTickMsg{}
+		return HourlyTickMsg{}
 	}
 }

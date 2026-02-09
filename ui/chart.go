@@ -8,14 +8,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func DrawChart(width int, height int, temps []float64) string {
-	var maxTemp, minTemp = temps[0], temps[0]
-	for _, v := range temps {
-		if v < minTemp {
-			minTemp = v
+func DrawChart(width int, height int, data []float64, chartType string) string {
+	var maxData, minData = data[0], data[0]
+	for _, v := range data {
+		if v < minData {
+			minData = v
 		}
-		if v > maxTemp {
-			maxTemp = v
+		if v > maxData {
+			maxData = v
 		}
 	}
 	chart := linechart.New(
@@ -23,8 +23,8 @@ func DrawChart(width int, height int, temps []float64) string {
 		height,
 		0,       // minX
 		24,      // maxX
-		minTemp, // minY
-		maxTemp, // maxY
+		minData, // minY
+		maxData, // maxY
 		linechart.WithXLabelFormatter(func(_ int, v float64) string {
 			currHour := int(v)
 			// Add 24 hour label without overlapping the last label
@@ -38,14 +38,26 @@ func DrawChart(width int, height int, temps []float64) string {
 			return ""
 		}),
 	)
-	for i := 0; i < len(temps)-1; i++ {
-		p1 := canvas.Float64Point{X: float64(i), Y: temps[i]}
-		p2 := canvas.Float64Point{X: float64(i + 1), Y: temps[i+1]}
-		chart.DrawBrailleLineWithStyle(p1, p2, tempChartColorStyle)
+	for i := 0; i < len(data)-1; i++ {
+		p1 := canvas.Float64Point{X: float64(i), Y: data[i]}
+		p2 := canvas.Float64Point{X: float64(i + 1), Y: data[i+1]}
+		if chartType == "temp" {
+			chart.DrawBrailleLineWithStyle(p1, p2, tempChartColorStyle)
+		}
+		if chartType == "precipitation" {
+			chart.DrawBrailleLineWithStyle(p1, p2, precipitationChartColorStyle)
+		}
 	}
 
 	chart.DrawXYAxisAndLabel()
-	legend := tempChartLegendStyle.Render("Daily Temperature")
-	chartString := lipgloss.JoinVertical(lipgloss.Top, legend, tempChartStyle.Render(chart.View()))
+
+	var chartString string
+	if chartType == "temp" {
+		legend := tempChartLegendStyle.Render("Daily Temperature")
+		chartString = lipgloss.JoinVertical(lipgloss.Top, legend, paddingChartStyle.Render(chart.View()))
+	}
+	if chartType == "precipitation" {
+		chartString = paddingChartStyle.Render(chart.View())
+	}
 	return chartString
 }
