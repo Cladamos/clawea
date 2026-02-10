@@ -66,6 +66,7 @@ func EnsureConfig() {
 
 	content := `# Latitude and longitude data must be in float64
 # Country and region data must be in string (it will show on top of the weather stats)
+# If latitude and longitude are 0.0 and longitude are 0.0, it will use ip-api.com to get the location
 
 [location]
 latitude  = 0.0
