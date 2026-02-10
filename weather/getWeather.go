@@ -8,6 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/cladamos/clawea/config"
 )
 
 type location struct {
@@ -75,19 +76,31 @@ func getLocation() (loc location, e error) {
 
 func GetWeather() tea.Cmd {
 	return func() tea.Msg {
-		location, ipApiErr := getLocation()
+		cfg := config.Load()
+		var loc location
+		if cfg.Latitude == 0.0 && cfg.Longitude == 0.0 {
+			var ipApiErr error
+			loc, ipApiErr = getLocation()
+			if ipApiErr != nil {
+				return ApiErrorMsg{message: "Request failed: " + ipApiErr.Error()}
+			}
+		} else {
+			loc = location{
+				Lat:     cfg.Latitude,
+				Lon:     cfg.Longitude,
+				Country: cfg.Country,
+				Region:  cfg.Region,
+			}
+		}
 		baseURL := "https://api.open-meteo.com/v1/forecast"
 		params := url.Values{}
-		params.Add("latitude", fmt.Sprintf("%f", location.Lat))
-		params.Add("longitude", fmt.Sprintf("%f", location.Lon))
+		params.Add("latitude", fmt.Sprintf("%f", loc.Lat))
+		params.Add("longitude", fmt.Sprintf("%f", loc.Lon))
 		params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
 		params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
 		params.Add("forecast_days", "6")
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
-		if ipApiErr != nil {
-			return ApiErrorMsg{message: "Request failed: " + ipApiErr.Error()}
-		}
 
 		res, err := http.Get(fullURL)
 		if err != nil {
@@ -101,7 +114,7 @@ func GetWeather() tea.Cmd {
 		if err := json.NewDecoder(res.Body).Decode(&weather); err != nil {
 			return ApiErrorMsg{message: "Failed to parse response: " + err.Error()}
 		}
-		return WeatherMsg{Daily: weather.Daily, Current: weather.Current, Location: location}
+		return WeatherMsg{Daily: weather.Daily, Current: weather.Current, Location: loc}
 	}
 }
 
