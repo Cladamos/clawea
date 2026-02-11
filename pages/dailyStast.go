@@ -17,18 +17,17 @@ type hourlyWeatherCard struct {
 
 func createWeatherCards(currDayWeather weather.CurrDayWeatherMsg) []hourlyWeatherCard {
 	var cards []hourlyWeatherCard
-	var isDay bool
-
+	var isNight bool
 	currHour := time.Now().Hour()
 	for i := currHour; i < 24; i++ {
 		// I hardcoded 06.00-18.00 as day time
-		if i <= 5 || i >= 17 {
-			isDay = false
+		if i < 6 || i > 18 {
+			isNight = true
 		} else {
-			isDay = true
+			isNight = false
 		}
 		hour := fmt.Sprintf("%02d:00", i)
-		icon := ui.WeatherIcon.Render(ui.WeatherCodeDecoder(currDayWeather.Hourly.WeatherCodes[i], isDay).Icon)
+		icon := ui.WeatherIcon.Render(ui.WeatherCodeDecoder(currDayWeather.Hourly.WeatherCodes[i], isNight).Icon)
 		currCard := hourlyWeatherCard{
 			hour:   hour,
 			icon:   icon,
