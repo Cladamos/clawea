@@ -46,7 +46,7 @@ country   = Türkiye
 region    = Edirne
 
 [metrics]
-is_imperial = false
+isImperial = false
 ```
 
 ## APIs Used
