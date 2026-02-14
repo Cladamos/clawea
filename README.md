@@ -36,7 +36,7 @@ Clawea follows standard OS conventions for storing configuration files. On your 
 * **Windows:** `%AppData%\clawea\config.conf`
 
 ### Configuration Settings
-You can manually set your coordinates or leave them as `0.0` to enable automatic location detection via your IP address.
+You can manually set your coordinates or leave them as `0.0` to enable automatic location detection via your IP address. Also you can change metrics to your preferred one.
 
 ```ini
 [location]
@@ -44,6 +44,9 @@ latitude  = 41.67
 longitude = 26.56
 country   = Türkiye
 region    = Edirne
+
+[metrics]
+is_imperial = false
 ```
 
 ## APIs Used

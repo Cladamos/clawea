@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	Latitude  float64
-	Longitude float64
-	Country   string
-	Region    string
+	Latitude   float64
+	Longitude  float64
+	Country    string
+	Region     string
+	IsImperial bool
 }
 
 func defaultCfg() Config {
@@ -54,6 +55,9 @@ func Load() Config {
 	cfg.Country = sec.Key("country").MustString(cfg.Country)
 	cfg.Region = sec.Key("region").MustString(cfg.Region)
 
+	sec = iniFile.Section("metrics")
+	cfg.IsImperial = sec.Key("isImperial").MustBool(cfg.IsImperial)
+
 	return cfg
 }
 
@@ -73,6 +77,11 @@ latitude  = 0.0
 longitude = 0.0
 country   = 
 region    = 
+
+# You can change the metrics to imperial with this boolean
+
+[metrics]
+isImperial = false
 `
 
 	_ = os.WriteFile(path, []byte(content), 0644)

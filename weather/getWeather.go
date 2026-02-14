@@ -99,6 +99,11 @@ func GetWeather() tea.Cmd {
 		params.Add("daily", "weather_code,temperature_2m_max,temperature_2m_min")
 		params.Add("current", "weather_code,temperature_2m,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m")
 		params.Add("forecast_days", "6")
+		params.Add("timezone", "auto")
+		if cfg.IsImperial {
+			params.Add("temperature_unit", "fahrenheit")
+			params.Add("wind_speed_unit", "mph")
+		}
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
@@ -120,6 +125,7 @@ func GetWeather() tea.Cmd {
 
 func GetCurrDayWeather(lat, lon float64) tea.Cmd {
 	return func() tea.Msg {
+		cfg := config.Load()
 		baseURL := "https://api.open-meteo.com/v1/forecast"
 		params := url.Values{}
 		params.Add("latitude", fmt.Sprintf("%f", lat))
@@ -127,6 +133,9 @@ func GetCurrDayWeather(lat, lon float64) tea.Cmd {
 		params.Add("hourly", "temperature_2m,weather_code,precipitation_probability")
 		params.Add("timezone", "auto")
 		params.Add("forecast_days", "1")
+		if cfg.IsImperial {
+			params.Add("temperature_unit", "fahrenheit")
+		}
 
 		fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 

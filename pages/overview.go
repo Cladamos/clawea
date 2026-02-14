@@ -5,12 +5,24 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/cladamos/clawea/config"
 	"github.com/cladamos/clawea/ui"
 	"github.com/cladamos/clawea/weather"
 )
 
 func Overview(weather weather.WeatherMsg, temps []float64, width int, height int,
 	isVertical bool, isOneBoxLayout bool, tempLoading bool, loading bool, loadingText string) string {
+
+	cfg := config.Load()
+	var tempUnit string
+	var windSpeedUnit string
+	if cfg.IsImperial {
+		tempUnit = "°F"
+		windSpeedUnit = "mph"
+	} else {
+		tempUnit = "°C"
+		windSpeedUnit = "km/h"
+	}
 
 	// -4 width comes from margin (2) and lipgloss add extra (2) characters to width
 	currDecodedWeather := ui.WeatherCodeDecoder(weather.Current.WeatherCode, weather.Current.IsDay == 0)
@@ -20,15 +32,22 @@ func Overview(weather weather.WeatherMsg, temps []float64, width int, height int
 	weatherIcon := ui.WeatherIcon.Render(currDecodedWeather.Icon)
 	weatherStats := ui.WeatherStats.Render(fmt.Sprintf(
 		"Weather:       %s\n"+
-			"Temperature:   %.0f°C\n"+
-			"Feels Like:    %.0f°C\n"+
+			"Temperature:   %.0f%s\n"+
+			"Feels Like:    %.0f%s\n"+
 			"Humidity:      %d%%\n"+
-			"Wind Speed:    %.0f km/h",
+			"Wind Speed:    %.0f %s",
 		currDecodedWeather.Label,
+
 		weather.Current.Temperature,
+		tempUnit,
+
 		weather.Current.ApparentTemperature,
+		tempUnit,
+
 		weather.Current.Humidity,
+
 		weather.Current.WindSpeed,
+		windSpeedUnit,
 	))
 
 	// Show currDayTempChart if terminal is wide enough
@@ -77,7 +96,7 @@ func Overview(weather weather.WeatherMsg, temps []float64, width int, height int
 			date, _ := time.Parse("2006-01-02", weather.Daily.Dates[i])
 			upComingDays = append(upComingDays, lipgloss.JoinVertical(lipgloss.Center, date.Format("Mon 02"),
 				ui.WeatherIcon.Render(ui.WeatherCodeDecoder(weather.Daily.WeatherCodes[i], false).Icon),
-				fmt.Sprintf("%.0f°C  %.0f°C", weather.Daily.MaxTemps[i], weather.Daily.MinTemps[i])))
+				fmt.Sprintf("%.0f%s  %.0f%s", weather.Daily.MaxTemps[i], tempUnit, weather.Daily.MinTemps[i], tempUnit)))
 			if i != maxCards {
 				upComingDays = append(upComingDays, ui.UpComingDayDivider)
 			}

@@ -98,6 +98,7 @@ var (
   _ /""`) + `.-.` + yellowStyle(`
 	\_`) + `(   ).` + yellowStyle(`
 	/`) + `(___(__)
+
 `
 
 	HeavyRain = `
@@ -140,6 +141,7 @@ var (
   . /""`) + `.-.` + lightBlueStyle(`
   . \_`) + `(   ).` + lightBlueStyle(`
 	.`) + `(___(__)
+	
 `
 
 	ClearNight = lightBlueStyle(`
