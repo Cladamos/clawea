@@ -28,7 +28,7 @@ type model struct {
 	loadingSpinner spinner.Model
 	paginator      paginator.Model
 	loading        bool
-	tempLoading    bool
+	currDayLoading bool
 	page           int
 }
 
@@ -62,7 +62,7 @@ func InitialModel() *model {
 	return &model{
 		keys:           keys,
 		loading:        true,
-		tempLoading:    true,
+		currDayLoading: true,
 		loadingSpinner: s,
 		paginator:      p,
 		page:           0,
@@ -110,7 +110,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, weather.GetCurrDayWeather(m.weather.Location.Lat, m.weather.Location.Lon)
 	case weather.CurrDayWeatherMsg:
 		m.currDayWeather = msg
-		m.tempLoading = false
+		m.currDayLoading = false
 		return m, nil
 	}
 
@@ -145,9 +145,9 @@ func (m *model) View() string {
 	currPage := ""
 	switch m.page {
 	case 0:
-		currPage = pages.Overview(m.weather, m.currDayWeather.Hourly.Temperatures, m.width, m.height, isVertical, isOneBoxLayout, m.tempLoading, m.loading, loadingText)
+		currPage = pages.Overview(m.weather, m.currDayWeather.Hourly.Temperatures, m.width, m.height, isVertical, isOneBoxLayout, m.currDayLoading, m.loading, loadingText)
 	case 1:
-		currPage = pages.DailyStast(m.currDayWeather, m.width, m.height, isOneBoxLayout, isVertical)
+		currPage = pages.DailyStast(m.currDayWeather, m.currDayLoading, loadingText, m.width, m.height, isOneBoxLayout, isVertical)
 	}
 	return lipgloss.JoinVertical(lipgloss.Center, currPage, m.paginator.View())
 }

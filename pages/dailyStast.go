@@ -58,8 +58,11 @@ func createWeatherCards(currDayWeather weather.CurrDayWeatherMsg) []hourlyWeathe
 	return cards
 }
 
-func DailyStast(currDayWeather weather.CurrDayWeatherMsg, width int, height int, isOneBoxLayout bool, isVertical bool) string {
+func DailyStast(currDayWeather weather.CurrDayWeatherMsg, loading bool, loadingText string, width int, height int, isOneBoxLayout bool, isVertical bool) string {
 
+	if loading {
+		return loadingText
+	}
 	cardDatas := createWeatherCards(currDayWeather)
 	// Each card has 18 width with dividers so 5 cards = 90, 3 cards= 54
 	maxCards := (width - 4) / 18
